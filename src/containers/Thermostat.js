@@ -247,10 +247,10 @@ class Thermostat extends React.Component {
               {Math.round(this.props.targetTemperature)}º
             </text>
             <text x={radius} y={radius * 0.575} style={styles.awayResumeText}>
-              {convertedAwayResumeTime && `Will ${this.props.awayResumeMode === "cool" ? "cool" : "heat"} in`}
+              {this.props.awayResumeTime > 0 ? `Will ${this.props.awayResumeMode === "cool" ? "cool" : "heat"} in` : ""}
             </text>
             <text x={radius} y={radius * 0.725} style={styles.awayResumeTime}>
-              {convertedAwayResumeTime}
+              {this.props.awayResumeTime > 0 ? convertedAwayResumeTime : ""}
             </text>
             <text x={radius} y={radius} style={styles.away}>
               AWAY

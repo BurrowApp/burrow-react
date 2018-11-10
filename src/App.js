@@ -11,9 +11,27 @@ class App extends Component {
     // hvacMode: "heating",
     // hvacMode: "cooling",
     awayResumeTime: 12433245,
+    // awayResumeTime: 2000,
     // awayResumeTime: null,
     awayResumeMode: "heat",
     hvacFan: false,
+  }
+
+  awayResumeTimer() {
+    this.setState({
+      awayResumeTime: this.state.awayResumeTime - 1000,
+    })
+    if (this.state.awayResumeTime < 1000) {
+      clearInterval(this.intervalId)
+    }
+  }
+
+  componentDidMount() {
+    this.intervalId = setInterval(this.awayResumeTimer.bind(this), 1000)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.intervalId)
   }
 
   render() {
