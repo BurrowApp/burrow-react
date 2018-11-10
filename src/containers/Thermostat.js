@@ -1,7 +1,8 @@
 import prettyMs from "pretty-ms"
 import PropTypes from "prop-types"
 import React from "react"
-import thermostatBgImg from "../thermostat-bg.png"
+import thermostatCooling from "../thermostat-cooling.png"
+import thermostatHeating from "../thermostat-heating.png"
 
 class Thermostat extends React.Component {
   getStyles() {
@@ -10,47 +11,17 @@ class Thermostat extends React.Component {
       hvacHeating: "HSL(360, 100%, 45%)",
       hvacCooling: "HSL(223, 84%, 46%)",
       hvacAway: "HSL(25, 80%, 55%)",
+      dialColor: "HSL(0, 0%, 10%)",
+      displayColor: "HSL(0, 0%, 4%)",
     }
     // const colors = { hvacOff: "hsl(0, 0%, 8%)", hvacHeating: "HSL(341, 65%, 45%)", hvacCooling: "HSL(278, 54%, 34%)" }
-    let dialColor = colors.hvacOff
-    if (this.props.hvacMode === "heating") {
-      dialColor = colors.hvacHeating
-    } else if (this.props.hvacMode === "cooling") {
-      dialColor = colors.hvacCooling
-    } else if (this.props.hvacMode === "away") {
-      dialColor = colors.hvacAway
-    }
 
     return {
-      outerRing: {
-        position: "relative",
-        display: "inline-block",
-        padding: "3vw",
-        borderRadius: "50%",
-        backgroundColor: "HSL(0, 0%, 98%)",
+      dial: {
+        fill: colors.dialColor,
       },
-      insetShadowOverlay: {
-        position: "absolute",
-        width: "50vw",
-        height: "50vw",
-        borderRadius: "50%",
-        boxShadow: "inset 0 0.5vw 1vw 0.5vw rgba(0, 0, 0, 0.1)",
-      },
-      dialWrap: {
-        backgroundColor: "HSL(0, 0%, 8%)",
-        borderRadius: "50%",
-      },
-      dialContainer: {
-        WebkitUserSelect: "none",
-        MozUserSelect: "none",
-        msUserSelect: "none",
-        userSelect: "none",
-        fill: "red",
-        borderRadius: "50%",
-      },
-      dial: {},
       display: {
-        fill: dialColor,
+        fill: colors.displayColor,
         WebkitTransition: "fill 0.5s",
         transition: "fill 0.5s",
       },
@@ -216,53 +187,51 @@ class Thermostat extends React.Component {
 
     // Piece it all together to form the thermostat display.
     return (
-      <div style={styles.outerRing}>
-        <div style={styles.insetShadowOverlay} />
-        <div style={styles.dialWrap}>
-          <svg
-            width={this.props.width}
-            height={this.props.height}
-            style={styles.dialContainer}
-            viewBox={["0 0 ", diameter, " ", diameter].join("")}
-          >
+      <div>
+        <svg
+          width={this.props.width}
+          height={this.props.height}
+          style={styles.dialContainer}
+          viewBox={["0 0 ", diameter, " ", diameter].join("")}
+        >
+          {this.props.hvacMode === "cooling" && (
             <filter id="dial" x="0%" y="0%" width="100%" height="100%">
-              <feImage xlinkHref={thermostatBgImg} />
-              {/* {(this.props.hvacMode === "heating" || this.props.hvacMode === "cooling") && (
-                <feColorMatrix
-                type="matrix"
-                values=".7   0   0   0   0
-                0  .7   0   0   0
-                0   0  .7   0   0
-                0   0   0   1   0 "
-                />
-              )} */}
+              <feImage xlinkHref={thermostatCooling} />
             </filter>
-            <filter id="display" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="6" stdDeviation="5" floodOpacity="0.5" />
+          )}
+          {this.props.hvacMode === "heating" && (
+            <filter id="dial" x="0%" y="0%" width="100%" height="100%">
+              <feImage xlinkHref={thermostatHeating} />
             </filter>
-            <circle cx={radius} cy={radius} r={radius} style={styles.dial} filter="url(#dial)" />
-            <circle cx={radius} cy={radius} r={radius * 0.7} style={styles.display} filter="url(#display)" />
-            <g>{tickArray}</g>
-            <text x={radius} y={radius * 0.925} style={styles.target}>
-              {Math.round(this.props.targetTemperature)}º
-            </text>
-            <text x={radius} y={radius * 0.575} style={styles.awayResumeText}>
-              {this.props.awayResumeTime > 0 ? `Will ${this.props.awayResumeMode === "cool" ? "cool" : "heat"} in` : ""}
-            </text>
-            <text x={radius} y={radius * 0.725} style={styles.awayResumeTime}>
-              {this.props.awayResumeTime > 0 ? convertedAwayResumeTime : ""}
-            </text>
-            <text x={radius} y={radius} style={styles.away}>
-              AWAY
-            </text>
-            <text x={radius} y={radius} style={styles.off}>
-              OFF
-            </text>
-            <text x={radius} y={radius * 1.25} style={styles.ambient}>
-              Currently {Math.round(this.props.ambientTemperature)}º
-            </text>
-          </svg>
-        </div>
+          )}
+          <circle
+            cx={radius}
+            cy={radius}
+            r={radius}
+            style={styles.dial}
+            filter={(this.props.hvacMode === "heating" || this.props.hvacMode === "cooling") && "url(#dial)"}
+          />
+          <circle cx={radius} cy={radius} r={radius * 0.7} style={styles.display} />
+          <g>{tickArray}</g>
+          <text x={radius} y={radius * 0.925} style={styles.target}>
+            {Math.round(this.props.targetTemperature)}º
+          </text>
+          <text x={radius} y={radius * 0.575} style={styles.awayResumeText}>
+            {this.props.awayResumeTime > 0 ? `Will ${this.props.awayResumeMode === "cool" ? "cool" : "heat"} in` : ""}
+          </text>
+          <text x={radius} y={radius * 0.725} style={styles.awayResumeTime}>
+            {this.props.awayResumeTime > 0 ? convertedAwayResumeTime : ""}
+          </text>
+          <text x={radius} y={radius} style={styles.away}>
+            AWAY
+          </text>
+          <text x={radius} y={radius} style={styles.off}>
+            OFF
+          </text>
+          <text x={radius} y={radius * 1.25} style={styles.ambient}>
+            Currently {Math.round(this.props.ambientTemperature)}º
+          </text>
+        </svg>
       </div>
     )
   }
