@@ -1,28 +1,29 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react"
+import "./App.css"
+import Thermostat from "./containers/Thermostat.js"
 
 class App extends Component {
+  state = {
+    away: false,
+    ambientTemperature: 72,
+    targetTemperature: 68,
+    hvacMode: "cooling",
+  }
+
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <Thermostat
+          height="50vw"
+          width="50vw"
+          away={this.state.away}
+          ambientTemperature={this.state.ambientTemperature}
+          targetTemperature={this.state.targetTemperature}
+          hvacMode={this.state.hvacMode}
+        />
       </div>
-    );
+    )
   }
 }
 
-export default App;
+export default App
