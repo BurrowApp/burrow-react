@@ -1,23 +1,31 @@
+import prettyMs from "pretty-ms"
 import PropTypes from "prop-types"
 import React from "react"
 import thermostatBgImg from "../thermostat-bg.png"
 
 class Thermostat extends React.Component {
   getStyles() {
-    const colors = { hvacOff: "HSL(0, 0%, 8%)", hvacHeating: "HSL(360, 100%, 45%)", hvacCooling: "HSL(223, 84%, 46%)" }
+    const colors = {
+      hvacOff: "HSL(0, 0%, 14%)",
+      hvacHeating: "HSL(360, 100%, 45%)",
+      hvacCooling: "HSL(223, 84%, 46%)",
+      hvacAway: "HSL(25, 80%, 55%)",
+    }
     // const colors = { hvacOff: "hsl(0, 0%, 8%)", hvacHeating: "HSL(341, 65%, 45%)", hvacCooling: "HSL(278, 54%, 34%)" }
     let dialColor = colors.hvacOff
     if (this.props.hvacMode === "heating") {
       dialColor = colors.hvacHeating
     } else if (this.props.hvacMode === "cooling") {
       dialColor = colors.hvacCooling
+    } else if (this.props.hvacMode === "away") {
+      dialColor = colors.hvacAway
     }
 
     return {
       outerRing: {
         position: "relative",
         display: "inline-block",
-        padding: "8vw",
+        padding: "3vw",
         borderRadius: "50%",
         backgroundColor: "HSL(0, 0%, 98%)",
       },
@@ -29,7 +37,7 @@ class Thermostat extends React.Component {
         boxShadow: "inset 0 0.5vw 1vw 0.5vw rgba(0, 0, 0, 0.1)",
       },
       dialWrap: {
-        backgroundColor: "HSL(0, 0%, 10%)",
+        backgroundColor: "HSL(0, 0%, 8%)",
         borderRadius: "50%",
       },
       dialContainer: {
@@ -53,7 +61,7 @@ class Thermostat extends React.Component {
         alignmentBaseline: "central",
         fontSize: "120px",
         fontWeight: "bold",
-        visibility: this.props.away ? "hidden" : "visible",
+        visibility: this.props.hvacMode === "away" || this.props.hvacMode === "off" ? "hidden" : "visible",
       },
       ambient: {
         fill: "white",
@@ -70,15 +78,35 @@ class Thermostat extends React.Component {
         alignmentBaseline: "central",
         fontSize: "72px",
         fontWeight: "bold",
-        opacity: this.props.away ? "1" : "0",
+        opacity: this.props.hvacMode === "away" ? "1" : "0",
         pointerEvents: "none",
       },
-      leaf: {
-        fill: "#13EB13",
-        opacity: this.props.leaf ? "1" : "0",
-        visibility: this.props.away ? "hidden" : "visible",
-        WebkitTransition: "opacity 0.5s",
-        transition: "opacity 0.5s",
+      awayResumeText: {
+        fill: "white",
+        textAnchor: "middle",
+        fontFamily: "Helvetica, sans-serif",
+        alignmentBaseline: "central",
+        fontSize: "22px",
+        fontWeight: "bold",
+        opacity: this.props.hvacMode === "away" ? "1" : "0",
+      },
+      awayResumeTime: {
+        fill: "white",
+        textAnchor: "middle",
+        fontFamily: "Helvetica, sans-serif",
+        alignmentBaseline: "central",
+        fontSize: "30px",
+        fontWeight: "bold",
+        opacity: this.props.hvacMode === "away" ? "1" : "0",
+      },
+      off: {
+        fill: "white",
+        textAnchor: "middle",
+        fontFamily: "Helvetica, sans-serif",
+        alignmentBaseline: "central",
+        fontSize: "72px",
+        fontWeight: "bold",
+        opacity: this.props.hvacMode === "off" ? "1" : "0",
         pointerEvents: "none",
       },
     }
@@ -125,7 +153,7 @@ class Thermostat extends React.Component {
     // Determine the maximum and minimum values to display.
     let actualMinValue
     let actualMaxValue
-    if (this.props.away) {
+    if (this.props.hvacMode === "away" || this.props.hvacMode === "off") {
       actualMinValue = this.props.ambientTemperature
       actualMaxValue = actualMinValue
     } else {
@@ -179,6 +207,10 @@ class Thermostat extends React.Component {
       tickArray.push(tickElement)
     }
 
+    // Make away resume time human readable
+    const convertedAwayResumeTime =
+      this.props.awayResumeTime && prettyMs(this.props.awayResumeTime, { secDecimalDigits: 0 })
+
     // The styles change based on state.
     const styles = this.getStyles()
 
@@ -214,11 +246,20 @@ class Thermostat extends React.Component {
             <text x={radius} y={radius * 0.925} style={styles.target}>
               {Math.round(this.props.targetTemperature)}º
             </text>
-            <text x={radius} y={radius * 1.25} style={styles.ambient}>
-              Currently {Math.round(this.props.ambientTemperature)}º
+            <text x={radius} y={radius * 0.575} style={styles.awayResumeText}>
+              {convertedAwayResumeTime && `Will ${this.props.awayResumeMode === "cool" ? "cool" : "heat"} in`}
+            </text>
+            <text x={radius} y={radius * 0.725} style={styles.awayResumeTime}>
+              {convertedAwayResumeTime}
             </text>
             <text x={radius} y={radius} style={styles.away}>
               AWAY
+            </text>
+            <text x={radius} y={radius} style={styles.off}>
+              OFF
+            </text>
+            <text x={radius} y={radius * 1.25} style={styles.ambient}>
+              Currently {Math.round(this.props.ambientTemperature)}º
             </text>
           </svg>
         </div>
@@ -240,14 +281,12 @@ Thermostat.propTypes = {
   maxValue: PropTypes.number,
   /* Indicates whether or not the thermostat is in "away mode" */
   away: PropTypes.bool,
-  /* Indicates whether or not the thermostat is in "energy savings mode" */
-  leaf: PropTypes.bool,
   /* Actual temperature detected by the thermostat */
   ambientTemperature: PropTypes.number,
   /* Desired temperature that the thermostat attempts to reach */
   targetTemperature: PropTypes.number,
   /* Current state of operations within the thermostat */
-  hvacMode: PropTypes.oneOf(["off", "heating", "cooling"]),
+  hvacMode: PropTypes.oneOf(["off", "away", "heating", "cooling"]),
 }
 
 Thermostat.defaultProps = {
@@ -256,8 +295,8 @@ Thermostat.defaultProps = {
   numTicks: 50,
   minValue: 40,
   maxValue: 100,
-  away: false,
-  leaf: false,
+  awayResumeTime: null,
+  awayResumeMode: null,
   ambientTemperature: 74,
   targetTemperature: 68,
   hvacMode: "off",
