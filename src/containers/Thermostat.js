@@ -1,61 +1,74 @@
 import prettyMs from "pretty-ms"
 import PropTypes from "prop-types"
 import React from "react"
+import coolingIcon from "../cooling-icon.png"
+import fanIcon from "../fan-icon.png"
+import heatingIcon from "../heating-icon.png"
 import thermostatCooling from "../thermostat-cooling.png"
 import thermostatHeating from "../thermostat-heating.png"
+import thermostatSleep from "../thermostat-sleep.png"
 
 class Thermostat extends React.Component {
   getStyles() {
-    const colors = {
-      hvacOff: "HSL(0, 0%, 14%)",
-      hvacHeating: "HSL(360, 100%, 45%)",
-      hvacCooling: "HSL(223, 84%, 46%)",
-      hvacAway: "HSL(25, 80%, 55%)",
-      dialColor: "HSL(0, 0%, 10%)",
-      displayColor: "HSL(0, 0%, 4%)",
-    }
-    // const colors = { hvacOff: "hsl(0, 0%, 8%)", hvacHeating: "HSL(341, 65%, 45%)", hvacCooling: "HSL(278, 54%, 34%)" }
-
     return {
+      thermostatDisplayWrap: {
+        marginBottom: "5vw",
+      },
+      dialContainer: {
+        maxWidth: "100%",
+      },
       dial: {
-        fill: colors.dialColor,
+        fill: "HSL(0, 0%, 13%)",
       },
       display: {
-        fill: colors.displayColor,
+        fill: "HSL(0, 0%, 1%)",
         WebkitTransition: "fill 0.5s",
         transition: "fill 0.5s",
       },
       target: {
         fill: "white",
         textAnchor: "middle",
-        fontFamily: "Helvetica, sans-serif",
         alignmentBaseline: "central",
-        fontSize: "120px",
-        fontWeight: "bold",
+        fontSize: "100px",
+        fontWeight: "600",
         visibility: this.props.hvacMode === "away" || this.props.hvacMode === "off" ? "hidden" : "visible",
       },
-      ambient: {
-        fill: "white",
+      hvacMode: {
         textAnchor: "middle",
-        fontFamily: "Helvetica, sans-serif",
         alignmentBaseline: "central",
-        fontSize: "22px",
-        fontWeight: "bold",
+        fontSize: "20px",
+        fontWeight: "600",
       },
-      away: {
-        fill: "white",
+      ambientTemp: {
         textAnchor: "middle",
-        fontFamily: "Helvetica, sans-serif",
         alignmentBaseline: "central",
-        fontSize: "72px",
-        fontWeight: "bold",
-        opacity: this.props.hvacMode === "away" ? "1" : "0",
-        pointerEvents: "none",
+        fontSize: "26px",
+        fontWeight: "600",
+        visibility: this.props.hvacMode === "away" || this.props.hvacMode === "off" ? "hidden" : "visible",
+      },
+      ambientTemp2: {
+        textAnchor: "middle",
+        alignmentBaseline: "central",
+        fontSize: "26px",
+        fontWeight: "600",
+        visibility: this.props.hvacMode === "away" || this.props.hvacMode === "off" ? "visible" : "hidden",
+      },
+      modeIcon: {
+        visibility: this.props.hvacMode === "heating" || this.props.hvacMode === "cooling" ? "visible" : "hidden",
+      },
+      fanIcon: {
+        visibility: this.props.fanOn ? "visible" : "hidden",
+      },
+      resumeTime: {
+        textAnchor: "middle",
+        alignmentBaseline: "central",
+        fontSize: "26px",
+        fontWeight: "600",
+        visibility: this.props.hvacMode === "away" ? "visible" : "hidden",
       },
       awayResumeText: {
         fill: "white",
         textAnchor: "middle",
-        fontFamily: "Helvetica, sans-serif",
         alignmentBaseline: "central",
         fontSize: "22px",
         fontWeight: "bold",
@@ -64,19 +77,24 @@ class Thermostat extends React.Component {
       awayResumeTime: {
         fill: "white",
         textAnchor: "middle",
-        fontFamily: "Helvetica, sans-serif",
         alignmentBaseline: "central",
         fontSize: "30px",
         fontWeight: "bold",
         opacity: this.props.hvacMode === "away" ? "1" : "0",
       },
-      off: {
-        fill: "white",
+      away: {
         textAnchor: "middle",
-        fontFamily: "Helvetica, sans-serif",
         alignmentBaseline: "central",
-        fontSize: "72px",
-        fontWeight: "bold",
+        fontSize: "74px",
+        fontWeight: "600",
+        opacity: this.props.hvacMode === "away" ? "1" : "0",
+        pointerEvents: "none",
+      },
+      off: {
+        textAnchor: "middle",
+        alignmentBaseline: "central",
+        fontSize: "80px",
+        fontWeight: "600",
         opacity: this.props.hvacMode === "off" ? "1" : "0",
         pointerEvents: "none",
       },
@@ -111,8 +129,6 @@ class Thermostat extends React.Component {
   }
 
   render() {
-    const _self = this
-
     // Local variables used for rendering.
     const diameter = 400
     const radius = diameter / 2
@@ -187,13 +203,8 @@ class Thermostat extends React.Component {
 
     // Piece it all together to form the thermostat display.
     return (
-      <div>
-        <svg
-          width={this.props.width}
-          height={this.props.height}
-          style={styles.dialContainer}
-          viewBox={["0 0 ", diameter, " ", diameter].join("")}
-        >
+      <div style={styles.thermostatDisplayWrap}>
+        <svg width={this.props.width} style={styles.dialContainer} viewBox={["0 0 ", diameter, " ", diameter].join("")}>
           {this.props.hvacMode === "cooling" && (
             <filter id="dial" x="0%" y="0%" width="100%" height="100%">
               <feImage xlinkHref={thermostatCooling} />
@@ -204,22 +215,38 @@ class Thermostat extends React.Component {
               <feImage xlinkHref={thermostatHeating} />
             </filter>
           )}
+          {(this.props.hvacMode === "off" || this.props.hvacMode === "away") && (
+            <filter id="dial" x="0%" y="0%" width="100%" height="100%">
+              <feImage xlinkHref={thermostatSleep} />
+            </filter>
+          )}
+          <filter id="heatingIcon" x="0%" y="0%" width="100%" height="100%">
+            <feImage xlinkHref={heatingIcon} />
+          </filter>
+          <filter id="coolingIcon" x="0%" y="0%" width="100%" height="100%">
+            <feImage xlinkHref={coolingIcon} />
+          </filter>
+          <filter id="fanIcon" x="0%" y="0%" width="100%" height="100%">
+            <feImage xlinkHref={fanIcon} />
+          </filter>
+          <circle cx={radius} cy={radius} r={radius * 0.7} style={styles.display} />
+          <circle cx={radius} cy={radius} r={radius} style={styles.dial} filter={"url(#dial)"} />
           <circle
             cx={radius}
-            cy={radius}
-            r={radius}
-            style={styles.dial}
-            filter={(this.props.hvacMode === "heating" || this.props.hvacMode === "cooling") && "url(#dial)"}
+            cy={radius * 0.585}
+            r={radius * 0.09}
+            style={styles.modeIcon}
+            filter={
+              (this.props.hvacMode === "heating" && "url(#heatingIcon)") ||
+              (this.props.hvacMode === "cooling" && "url(#coolingIcon)")
+            }
           />
-          <circle cx={radius} cy={radius} r={radius * 0.7} style={styles.display} />
+          <circle cx={radius} cy={radius * 1.45} r={radius * 0.08} style={styles.fanIcon} filter="url(#fanIcon)" />
           <g>{tickArray}</g>
-          <text x={radius} y={radius * 0.925} style={styles.target}>
-            {Math.round(this.props.targetTemperature)}º
+          <text x={radius} y={radius * 1.1} style={styles.target}>
+            {Math.round(this.props.targetTemperature)}
           </text>
-          <text x={radius} y={radius * 0.575} style={styles.awayResumeText}>
-            {this.props.awayResumeTime > 0 ? `Will ${this.props.awayResumeMode === "cool" ? "cool" : "heat"} in` : ""}
-          </text>
-          <text x={radius} y={radius * 0.725} style={styles.awayResumeTime}>
+          <text x={radius} y={radius * 1.3} style={styles.resumeTime}>
             {this.props.awayResumeTime > 0 ? convertedAwayResumeTime : ""}
           </text>
           <text x={radius} y={radius} style={styles.away}>
@@ -228,8 +255,15 @@ class Thermostat extends React.Component {
           <text x={radius} y={radius} style={styles.off}>
             OFF
           </text>
-          <text x={radius} y={radius * 1.25} style={styles.ambient}>
-            Currently {Math.round(this.props.ambientTemperature)}º
+          <text x={radius * 1.0125} y={radius * 1.45} style={styles.ambientTemp}>
+            {Math.round(this.props.ambientTemperature)}º
+          </text>
+          <text x={radius * 1.0125} y={radius * 0.68} style={styles.ambientTemp2}>
+            {Math.round(this.props.ambientTemperature)}º
+          </text>
+          <text x={radius} y={radius * 0.76} style={styles.hvacMode}>
+            {this.props.hvacMode && this.props.hvacMode === "heating" && "Heating"}
+            {this.props.hvacMode && this.props.hvacMode === "cooling" && "Cooling"}
           </text>
         </svg>
       </div>
@@ -256,19 +290,6 @@ Thermostat.propTypes = {
   targetTemperature: PropTypes.number,
   /* Current state of operations within the thermostat */
   hvacMode: PropTypes.oneOf(["off", "away", "heating", "cooling"]),
-}
-
-Thermostat.defaultProps = {
-  height: "100%",
-  width: "100%",
-  numTicks: 50,
-  minValue: 40,
-  maxValue: 100,
-  awayResumeTime: null,
-  awayResumeMode: null,
-  ambientTemperature: 74,
-  targetTemperature: 68,
-  hvacMode: "off",
 }
 
 export default Thermostat
